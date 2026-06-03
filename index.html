@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>带娃旅行体验抽卡机 · 兜兜探索</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f5f1ea;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .app {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Header */
+  .logo { font-size: 40px; margin-bottom: 4px; }
+  .app h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c2416;
+    margin-bottom: 4px;
+  }
+  .app .subtitle {
+    font-size: 13px;
+    color: #a09880;
+    margin-bottom: 24px;
+  }
+
+  /* Setup */
+  .setup {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
+  }
+  .setup-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .setup-item {
+    flex: 1;
+    min-width: 100px;
+    text-align: left;
+  }
+  .setup-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .setup-item input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e8e2d6;
+    border-radius: 12px;
+    font-size: 15px;
+    background: #fafaf7;
+    font-family: inherit;
+    color: #2c2416;
+  }
+  .setup-item input:focus {
+    outline: none;
+    border-color: #c8a87c;
+    background: #fff;
+  }
+
+  .category-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid #e8e2d6;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #6b6050;
+    user-select: none;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: #c8a87c; }
+  .chip.active {
+    background: #2c2416;
+    color: #fff;
+    border-color: #2c2416;
+  }
+
+  .btn-draw {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #d4a574, #c49565);
+    color: #fff;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-draw:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(180,130,80,0.3); }
+  .btn-draw:active { transform: scale(0.97); }
+  .btn-draw:disabled {
+    background: #d5cfc4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Card */
+  .card-stage {
+    perspective: 1000px;
+    margin: 0 auto 20px;
+    width: 100%;
+    max-width: 420px;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card {
+    width: 100%;
+    min-height: 300px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+  }
+
+  .card-front {
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    border: 2px dashed #e0d8c8;
+    cursor: default;
+  }
+  .card-front .card-back-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+  .card-front .hint {
+    font-size: 14px;
+    color: #bbb;
+  }
+
+  .card-back {
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: rotateY(180deg);
+    text-align: left;
+    justify-content: flex-start;
+    border: 2px solid #f0e8d8;
+  }
+
+  .card-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .badge-make { background: #fdf2e0; color: #b87a30; }
+  .badge-explore { background: #e8f4e8; color: #4a7c4a; }
+  .badge-tech { background: #e8ecf8; color: #4a5c8c; }
+  .badge-outdoor { background: #e8f0e8; color: #5a7c5a; }
+
+  .card-back h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c2416;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .card-back .card-location {
+    font-size: 13px;
+    color: #a09880;
+    margin-bottom: 16px;
+  }
+  .card-back .card-prompt {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #555;
+    background: #fafaf7;
+    padding: 14px;
+    border-radius: 12px;
+    font-family: "SF Mono", "Menlo", "Monaco", monospace;
+    word-break: break-word;
+    flex: 1;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    width: 100%;
+  }
+  .card-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-copy {
+    background: #2c2416;
+    color: #fff;
+  }
+  .btn-copy:hover { background: #4a3f2e; }
+  .btn-redraw {
+    background: #fff;
+    color: #6b6050;
+    border: 1.5px solid #e0d8c8 !important;
+  }
+  .btn-redraw:hover { border-color: #c8a87c !important; }
+  .btn-goto {
+    background: #fff;
+    color: #6b5640;
+    border: 1.5px solid #d4a574 !important;
+  }
+  .btn-goto:hover { background: #fdf8f2; border-color: #b87a30 !important; }
+
+  /* Confetti */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confetti-fall 0.8s ease-out forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c2416;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+
+  .footer {
+    margin-top: 24px;
+    font-size: 11px;
+    color: #c4bca8;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <h1>带娃旅行体验抽卡机</h1>
+  <p class="subtitle">输入目的地，翻一张体验灵感卡</p>
+
+  <!-- 设置 -->
+  <div class="setup">
+    <div class="setup-row">
+      <div class="setup-item">
+        <label>📍 目的地</label>
+        <input type="text" id="dest" placeholder="景德镇">
+      </div>
+      <div class="setup-item">
+        <label>👶 孩子年龄</label>
+        <input type="text" id="age" placeholder="5岁" value="5岁">
+      </div>
+    </div>
+    <div class="category-chips" id="chips">
+      <span class="chip active" data-cat="random">🎲 随机抽</span>
+      <span class="chip" data-cat="make">🎨 动手做</span>
+      <span class="chip" data-cat="explore">🔍 去发现</span>
+      <span class="chip" data-cat="tech">🤖 黑科技</span>
+      <span class="chip" data-cat="outdoor">🌿 大自然</span>
+    </div>
+    <button class="btn-draw" id="drawBtn" onclick="drawCard()">✨ 抽一张</button>
+    <p style="font-size:12px;color:#c4bca8;margin-top:8px;">每张卡是一个定制提示词，复制后去 豆包 跑出完整体验清单</p>
+  </div>
+
+  <!-- 卡片 -->
+  <div class="card-stage">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="card-back-icon">🃏</div>
+        <p class="hint">👆 输入目的地，抽一张试试</p>
+      </div>
+      <div class="card-face card-back" id="cardBack"></div>
+    </div>
+  </div>
+
+  <p class="footer">兜兜探索 · 一个INFP妈妈的带娃旅行系统</p>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti-container" id="confetti"></div>
+
+<script>
+let currentCat = 'random';
+let isFlipped = false;
+
+// Category chip toggle
+document.getElementById('chips').addEventListener('click', e => {
+  if (!e.target.classList.contains('chip')) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  currentCat = e.target.dataset.cat;
+});
+
+// Shuffle deck animation
+function shuffleDeck() {
+  const card = document.getElementById('card');
+  card.style.transition = 'transform 0.15s ease';
+  let shakes = 0;
+  const doShake = () => {
+    if (shakes >= 6) {
+      card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      card.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+      return;
+    }
+    const deg = shakes % 2 === 0 ? 4 : -4;
+    card.style.transform = (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)') + ` rotate(${deg}deg)`;
+    shakes++;
+    setTimeout(doShake, 80);
+  };
+  doShake();
+}
+
+function drawCard() {
+  const dest = document.getElementById('dest').value.trim() || '这个地方';
+  const age = document.getElementById('age').value.trim() || '5岁';
+
+  const catNames = { make: '动手体验', explore: '探索发现', tech: '科技新奇', outdoor: '户外自然' };
+  const catBadges = { make: 'badge-make', explore: 'badge-explore', tech: 'badge-tech', outdoor: 'badge-outdoor' };
+  const catEmoji = { make: '🎨', explore: '🔍', tech: '🤖', outdoor: '🌿' };
+
+  // Pick category
+  let cat;
+  if (currentCat === 'random') {
+    const cats = ['make','explore','tech','outdoor'];
+    cat = cats[Math.floor(Math.random() * cats.length)];
+  } else {
+    cat = currentCat;
+  }
+
+  // Build specific prompt
+  const prompts = {
+    make: `在${dest}，有哪些适合${age}孩子动手做的体验？可以是手工、食物制作、传统手艺、搭建类。要求：孩子能全程参与、不是纯观看。请给出3-4个具体推荐，标注地点、耗时、是否需预约、参考价格。`,
+    explore: `在${dest}，有哪些适合${age}孩子的探索发现类体验？可以是博物馆里能互动的展区、老城区的隐藏角落、菜市场或传统集市、有趣的建筑或街区。要求：孩子能观察、提问、发现。请给出3-4个具体推荐。`,
+    tech: `在${dest}，有哪些适合${age}孩子的科技或新奇体验？比如无人驾驶、VR/AR、机器人互动、新奇交通方式、科技馆的互动装置。要求：大人也会觉得新鲜。请给出3-4个具体推荐。`,
+    outdoor: `在${dest}，有哪些适合${age}孩子的户外自然体验？不是普通公园，是有特色的——划船、骑马、采茶、挖笋、溯溪、赶海、夜观昆虫等。要求：安全、亲子友好。请给出3-4个具体推荐。`
+  };
+
+  const prompt = prompts[cat];
+
+  // Build card back
+  const back = document.getElementById('cardBack');
+  back.innerHTML = `
+    <span class="card-badge ${catBadges[cat]}">${catEmoji[cat]} ${catNames[cat]}</span>
+    <h2>${dest} · ${catNames[cat]}</h2>
+    <p class="card-location">适合 ${age} 孩子 · 定制提示词</p>
+    <div class="card-prompt">${prompt}</div>
+    <div class="card-actions">
+      <button class="btn-copy" onclick="event.stopPropagation(); copyCardPrompt()">📋 复制</button>
+      <button class="btn-goto" onclick="event.stopPropagation(); openDoubao()">🚀 豆包</button>
+      <button class="btn-redraw" onclick="event.stopPropagation(); drawCard()">🔄 再抽一张</button>
+    </div>
+  `;
+
+  // Flip
+  if (!isFlipped) {
+    // First draw: flip with shuffle effect
+    shuffleDeck();
+    setTimeout(() => {
+      document.getElementById('card').classList.add('flipped');
+      isFlipped = true;
+      spawnConfetti();
+    }, 400);
+  } else {
+    // Redraw: flip down, update, flip up
+    const card = document.getElementById('card');
+    card.classList.remove('flipped');
+    isFlipped = false;
+    shuffleDeck();
+    setTimeout(() => {
+      card.style.transform = '';  // clear inline so class takes over
+      back.innerHTML = `
+        <span class="card-badge ${catBadges[cat]}">${catEmoji[cat]} ${catNames[cat]}</span>
+        <h2>${dest} · ${catNames[cat]}</h2>
+        <p class="card-location">适合 ${age} 孩子 · 定制提示词</p>
+        <div class="card-prompt">${prompt}</div>
+        <div class="card-actions">
+          <button class="btn-copy" onclick="event.stopPropagation(); copyCardPrompt()">📋 复制</button>
+          <button class="btn-goto" onclick="event.stopPropagation(); openDoubao()">🚀 豆包</button>
+          <button class="btn-redraw" onclick="event.stopPropagation(); drawCard()">🔄 再抽一张</button>
+        </div>
+      `;
+      card.classList.add('flipped');
+      isFlipped = true;
+      spawnConfetti();
+    }, 550);
+  }
+}
+
+function copyCardPrompt() {
+  const text = document.querySelector('.card-prompt').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✅ 已复制！去 豆包 粘贴吧');
+  });
+}
+
+function openDoubao() {
+  window.open('https://www.doubao.com/chat/', '_blank');
+}
+
+function spawnConfetti() {
+  const container = document.getElementById('confetti');
+  const colors = ['#d4a574','#e8c49a','#a8c8a0','#c8b8e0','#f0d878','#e8a0a0','#a0c0d8'];
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = -(Math.random() * 40) + 'px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.3 + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 1000);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+
+</body>
+</html>
