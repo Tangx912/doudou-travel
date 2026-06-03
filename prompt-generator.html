@@ -206,7 +206,7 @@
 <div class="container">
   <header>
     <h1>🗺️ 带娃旅行体验库</h1>
-    <p>输入目的地，自动生成 AI 提示词，一键复制到 Google AI Studio</p>
+    <p>输入目的地，自动生成 AI 提示词，一键复制到豆包</p>
   </header>
 
   <!-- 输入区 -->
@@ -225,7 +225,7 @@
     <div class="btn-row">
       <button class="btn btn-primary" onclick="generate()">✨ 生成提示词</button>
       <button class="btn btn-outline" id="copyBtn" onclick="copyPrompt()" disabled>📋 复制</button>
-      <button class="btn btn-outline" onclick="openAIStudio()">🚀 打开 AI Studio</button>
+      <button class="btn btn-outline" onclick="openDoubao()">🚀 打开豆包</button>
     </div>
   </div>
 
@@ -240,7 +240,7 @@
   <div class="tips" id="tips" style="display:none;">
     <strong>💡 怎么用：</strong><br>
     1. 点「复制」，提示词已在你剪贴板<br>
-    2. 点「打开 AI Studio」→ 粘贴 → 运行<br>
+    2. 点「打开 豆包」→ 粘贴 → 运行<br>
     3. 把生成的体验清单存到手机备忘录，出发前就有一个"随时抽卡"的库了<br>
     <span style="color:#b8a088;">输出的是体验候选池，不是行程表。到了当地根据孩子状态灵活挑。</span>
   </div>
@@ -320,14 +320,14 @@ function copyPrompt() {
   if (!text) return;
 
   navigator.clipboard.writeText(text).then(() => {
-    showToast('✅ 已复制，去 AI Studio 粘贴吧');
+    showToast('✅ 已复制，去 豆包 粘贴吧');
   }).catch(() => {
     showToast('复制失败，请手动选中复制');
   });
 }
 
-function openAIStudio() {
-  window.open('https://aistudio.google.com/prompts/new_chat', '_blank');
+function openDoubao() {
+  window.open('https://www.doubao.com/chat/', '_blank');
 }
 
 function showToast(msg) {
