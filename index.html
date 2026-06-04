@@ -3,380 +3,730 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>体验抽卡机 · 兜兜探索</title>
+<title>旅行工具箱 · 兜兜探索</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: #f5f1ea;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f7f5f0;
+    color: #2c2c2c;
+    line-height: 1.6;
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 20px;
+    padding: 40px 16px;
   }
 
-  .app {
-    max-width: 420px;
-    width: 100%;
+  .container { max-width: 680px; width: 100%; }
+
+  /* ======================================== */
+  /*  SCREEN 1: Mode Selection                 */
+  /* ======================================== */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .mode-header { text-align: center; margin-bottom: 36px; }
+  .mode-header h1 { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .mode-header p { font-size: 15px; color: #888; }
+
+  .mode-cards { display: flex; gap: 16px; flex-wrap: wrap; }
+  .mode-card {
+    flex: 1; min-width: 240px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 24px;
+    cursor: pointer;
+    border: 2px solid #e8e4dc;
+    transition: all 0.2s;
     text-align: center;
+    text-decoration: none;
+    color: inherit;
   }
+  .mode-card:hover { border-color: #d4a574; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .mode-card .mode-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .mode-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
+  .mode-card p { font-size: 13px; color: #999; line-height: 1.6; }
 
-  /* Header */
-  .logo { font-size: 40px; margin-bottom: 4px; }
-  .app h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #2c2416;
-    margin-bottom: 4px;
+  /* ======================================== */
+  /*  SCREEN 2: Tool Page                      */
+  /* ======================================== */
+  .tool-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .btn-back {
+    width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid #e8e4dc;
+    background: #fff; color: #6b6050; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
   }
-  .app .subtitle {
-    font-size: 13px;
-    color: #a09880;
-    margin-bottom: 24px;
-  }
+  .btn-back:hover { border-color: #d4a574; background: #fdfaf6; }
 
-  /* Setup */
-  .setup {
-    background: #fff;
-    border-radius: 20px;
-    padding: 24px 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    margin-bottom: 20px;
+  .tool-header-info { flex: 1; }
+  .tool-header-info .mode-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px;
   }
-  .setup-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .setup-item {
-    flex: 1;
-    min-width: 100px;
-    text-align: left;
-  }
-  .setup-item label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    display: block;
-  }
-  .setup-item input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1.5px solid #e8e2d6;
-    border-radius: 12px;
-    font-size: 15px;
-    background: #fafaf7;
-    font-family: inherit;
-    color: #2c2416;
-  }
-  .setup-item input:focus {
-    outline: none;
-    border-color: #c8a87c;
-    background: #fff;
-  }
+  .badge-kid { background: #fdf2e0; color: #b87a30; }
+  .badge-hotspot { background: #fde8e0; color: #b84a30; }
+  .tool-header-info h1 { font-size: 20px; font-weight: 700; color: #1a1a1a; }
 
-  .category-chips {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  .chip {
-    padding: 7px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1.5px solid #e8e2d6;
-    background: #fff;
-    cursor: pointer;
-    transition: all 0.15s;
-    color: #6b6050;
-    user-select: none;
-    font-family: inherit;
-  }
-  .chip:hover { border-color: #c8a87c; }
-  .chip.active {
-    background: #2c2416;
-    color: #fff;
-    border-color: #2c2416;
-  }
+  /* === Tool Tabs === */
+  .tool-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e8e4dc; }
+  .tool-tab { flex: 1; padding: 12px 16px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; background: transparent; color: #a09880; transition: all 0.2s; font-family: inherit; text-align: center; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tool-tab.active { color: #2c2416; border-bottom-color: #d4a574; }
+  .tool-tab:hover:not(.active) { color: #6b6050; }
 
-  .btn-draw {
-    width: 100%;
-    padding: 14px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(135deg, #d4a574, #c49565);
-    color: #fff;
-    letter-spacing: 1px;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
+  /* === Card === */
+  .card { background: #fff; border-radius: 16px; padding: 28px 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03); }
+  .card-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { font-size: 20px; }
+
+  /* === City List === */
+  .city-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+  .city-row { display: flex; gap: 8px; align-items: center; }
+  .city-row input { flex: 1; padding: 10px 14px; border: 1.5px solid #e8e4dc; border-radius: 10px; font-size: 15px; color: #1a1a1a; background: #fafaf8; transition: border-color 0.2s; font-family: inherit; }
+  .city-row input:focus { outline: none; border-color: #d4a574; background: #fff; }
+  .city-row input::placeholder { color: #c4c0b8; }
+  .city-row .city-num { font-size: 12px; color: #bbb; min-width: 28px; text-align: center; font-weight: 500; flex-shrink: 0; }
+  .btn-remove-city { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid #e8e4dc; background: #fff; color: #bbb; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; line-height: 1; padding: 0; }
+  .btn-remove-city:hover { color: #c0392b; border-color: #e8c8c0; background: #fefafa; }
+
+  .btn-add-city { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 8px; border: 1.5px dashed #d5cfc4; background: transparent; color: #a09880; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: inherit; margin-top: 4px; }
+  .btn-add-city:hover { border-color: #d4a574; color: #8b7355; background: #fdfaf6; }
+
+  .route-preview { font-size: 13px; color: #a09880; margin-top: 6px; min-height: 20px; }
+  .route-preview span { color: #6b5640; font-weight: 500; }
+
+  /* === Shared inputs === */
+  .input-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .input-field { flex: 1; min-width: 160px; }
+  .input-field label { display: block; font-size: 13px; font-weight: 500; color: #666; margin-bottom: 6px; }
+  .input-field input { width: 100%; padding: 10px 14px; border: 1.5px solid #e8e4dc; border-radius: 10px; font-size: 15px; color: #1a1a1a; background: #fafaf8; transition: border-color 0.2s; font-family: inherit; }
+  .input-field input:focus { outline: none; border-color: #d4a574; background: #fff; }
+  .input-field input::placeholder { color: #c4c0b8; }
+
+  /* === Buttons === */
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .btn { padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #d4a574; color: #fff; }
+  .btn-primary:hover { background: #c49565; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-outline { background: #fff; color: #5c5c5c; border: 1.5px solid #e0dcd4; }
+  .btn-outline:hover { background: #fafaf8; border-color: #d4a574; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* === Prompt Preview === */
+  .prompt-preview { background: #fafaf8; border: 1.5px solid #e8e4dc; border-radius: 12px; padding: 20px; font-size: 13.5px; line-height: 1.8; color: #444; white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow-y: auto; font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace; display: none; }
+  .prompt-preview.visible { display: block; }
+  .empty-state { text-align: center; color: #bbb; padding: 40px 20px; font-size: 14px; display: block; }
+  .empty-state.hidden { display: none; }
+
+  .tips { margin-top: 14px; padding: 14px 16px; background: #fdf8f2; border-radius: 10px; font-size: 13px; color: #8b7355; line-height: 1.7; }
+  .tips strong { color: #6b5640; }
+
+  /* === Card Machine === */
+  .category-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1.5px solid #e8e4dc; background: #fff; cursor: pointer; transition: all 0.15s; color: #6b6050; user-select: none; font-family: inherit; }
+  .chip:hover { border-color: #d4a574; }
+  .chip.active { background: #2c2416; color: #fff; border-color: #2c2416; }
+
+  .btn-draw { width: 100%; padding: 14px; border-radius: 14px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; background: linear-gradient(135deg, #d4a574, #c49565); color: #fff; letter-spacing: 1px; transition: all 0.15s; font-family: inherit; }
   .btn-draw:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(180,130,80,0.3); }
   .btn-draw:active { transform: scale(0.97); }
-  .btn-draw:disabled {
-    background: #d5cfc4;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+  .btn-draw:disabled { background: #d5cfc4; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* Card */
-  .card-stage {
-    perspective: 1000px;
-    margin: 0 auto 20px;
-    width: 100%;
-    max-width: 420px;
-    min-height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  /* === Flip Card === */
+  .card-stage { perspective: 1000px; margin: 0 auto 20px; width: 100%; max-width: 420px; min-height: 320px; display: flex; align-items: center; justify-content: center; }
+  .flip-card { width: 100%; min-height: 300px; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+  .card-front { background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.05); border: 2px dashed #e0d8c8; cursor: default; }
+  .card-front .card-back-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.6; }
+  .card-front .hint { font-size: 14px; color: #bbb; }
+  .card-back { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: rotateY(180deg); text-align: left; justify-content: flex-start; border: 2px solid #f0e8d8; }
 
-  .card {
-    width: 100%;
-    min-height: 300px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .card.flipped { transform: rotateY(180deg); }
-
-  .card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
-  }
-
-  .card-front {
-    background: #fff;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    border: 2px dashed #e0d8c8;
-    cursor: default;
-  }
-  .card-front .card-back-icon {
-    font-size: 56px;
-    margin-bottom: 16px;
-    opacity: 0.6;
-  }
-  .card-front .hint {
-    font-size: 14px;
-    color: #bbb;
-  }
-
-  .card-back {
-    background: #fff;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transform: rotateY(180deg);
-    text-align: left;
-    justify-content: flex-start;
-    border: 2px solid #f0e8d8;
-  }
-
-  .card-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-  }
+  .card-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; }
   .badge-make { background: #fdf2e0; color: #b87a30; }
   .badge-explore { background: #e8f4e8; color: #4a7c4a; }
   .badge-tech { background: #e8ecf8; color: #4a5c8c; }
   .badge-outdoor { background: #e8f0e8; color: #5a7c5a; }
+  .badge-landmark { background: #fde8e0; color: #b84a30; }
+  .badge-food { background: #fdf0e0; color: #b87830; }
+  .badge-photo { background: #f0e0f8; color: #7a4a9c; }
+  .badge-citywalk { background: #e0f0f0; color: #3a7a7a; }
+  .badge-culture { background: #f0e8e0; color: #7a5a3a; }
 
-  .card-back h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #2c2416;
-    margin-bottom: 6px;
-    line-height: 1.4;
-  }
-  .card-back .card-location {
-    font-size: 13px;
-    color: #a09880;
-    margin-bottom: 16px;
-  }
-  .card-back .card-prompt {
-    font-size: 13px;
-    line-height: 1.7;
-    color: #555;
-    background: #fafaf7;
-    padding: 14px;
-    border-radius: 12px;
-    font-family: "SF Mono", "Menlo", "Monaco", monospace;
-    word-break: break-word;
-    flex: 1;
-  }
+  .card-back h2 { font-size: 18px; font-weight: 700; color: #2c2416; margin-bottom: 6px; line-height: 1.4; }
+  .card-back .card-location { font-size: 13px; color: #a09880; margin-bottom: 16px; }
+  .card-back .card-prompt { font-size: 13px; line-height: 1.7; color: #555; background: #fafaf7; padding: 14px; border-radius: 12px; font-family: "SF Mono", "Menlo", "Monaco", monospace; word-break: break-word; flex: 1; }
 
-  .card-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-    width: 100%;
-  }
-  .card-actions button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-  .btn-copy {
-    background: #2c2416;
-    color: #fff;
-  }
+  .card-actions { display: flex; gap: 10px; margin-top: 14px; width: 100%; }
+  .card-actions button { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-copy { background: #2c2416; color: #fff; }
   .btn-copy:hover { background: #4a3f2e; }
-  .btn-redraw {
-    background: #fff;
-    color: #6b6050;
-    border: 1.5px solid #e0d8c8 !important;
-  }
+  .btn-redraw { background: #fff; color: #6b6050; border: 1.5px solid #e0d8c8 !important; }
   .btn-redraw:hover { border-color: #c8a87c !important; }
-  .btn-goto {
-    background: #fff;
-    color: #6b5640;
-    border: 1.5px solid #d4a574 !important;
-  }
+  .btn-goto { background: #fff; color: #6b5640; border: 1.5px solid #d4a574 !important; }
   .btn-goto:hover { background: #fdf8f2; border-color: #b87a30 !important; }
 
-  /* Confetti */
-  .confetti-container {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 999;
-  }
-  .confetti-piece {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    animation: confetti-fall 0.8s ease-out forwards;
-  }
+  /* === Confetti === */
+  .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+  .confetti-piece { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: confetti-fall 0.8s ease-out forwards; }
   @keyframes confetti-fall {
     0% { transform: translateY(-60px) rotate(0deg); opacity: 1; }
     100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
   }
 
-  .toast {
-    position: fixed;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #2c2416;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 20px;
-    font-size: 14px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s;
-    z-index: 1000;
-  }
+  /* === Toast === */
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #2c2c2c; color: #fff; padding: 10px 24px; border-radius: 20px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 1000; }
   .toast.show { opacity: 1; }
 
-  .footer {
-    margin-top: 24px;
-    font-size: 11px;
-    color: #c4bca8;
+  /* === Panel Visibility === */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  footer { text-align: center; margin-top: 32px; font-size: 12px; color: #bbb; }
+
+  @media (max-width: 480px) {
+    .mode-cards { flex-direction: column; }
+    .tool-tab { font-size: 13px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 6px 10px; }
   }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <h1>体验抽卡机</h1>
-  <p class="subtitle">输入目的地，翻一张体验灵感卡</p>
+<div class="container">
 
-  <!-- 设置 -->
-  <div class="setup">
-    <div class="setup-row">
-      <div class="setup-item">
-        <label>📍 目的地</label>
-        <input type="text" id="dest" placeholder="景德镇">
+  <!-- ======================================== -->
+  <!--  SCREEN 1: 选择旅行模式                   -->
+  <!-- ======================================== -->
+  <div class="screen active" id="screenMode">
+    <div class="mode-header">
+      <h1>🗺️ 旅行工具箱</h1>
+      <p>选一个模式，开始规划你的旅行</p>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="enterTool('kid')">
+        <span class="mode-icon">🧒</span>
+        <h2>小众亲子</h2>
+        <p>为带娃家庭挖掘可上手的新奇体验<br>不要网红景点，孩子能摸能做能参与</p>
       </div>
-      <div class="setup-item">
-        <label>👶 孩子年龄</label>
-        <input type="text" id="age" placeholder="5岁" value="5岁">
+      <div class="mode-card" onclick="enterTool('hotspot')">
+        <span class="mode-icon">🏛️</span>
+        <h2>经典热门</h2>
+        <p>经典景点+本地隐藏，实用可落地<br>必打卡、美食、出片、路线全都有</p>
       </div>
     </div>
-    <div class="category-chips" id="chips">
-      <span class="chip active" data-cat="random">🎲 随机抽</span>
-      <span class="chip" data-cat="make">🎨 动手做</span>
-      <span class="chip" data-cat="explore">🔍 去发现</span>
-      <span class="chip" data-cat="tech">🤖 黑科技</span>
-      <span class="chip" data-cat="outdoor">🌿 大自然</span>
-    </div>
-    <button class="btn-draw" id="drawBtn" onclick="drawCard()">✨ 抽一张</button>
-    <p style="font-size:12px;color:#c4bca8;margin-top:8px;">每张卡是一个定制提示词，复制后去 豆包 跑出完整体验清单</p>
+    <footer style="margin-top:40px;">兜兜探索 · 自用工具，不做商用</footer>
   </div>
 
-  <!-- 卡片 -->
-  <div class="card-stage">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="card-back-icon">🃏</div>
-        <p class="hint">👆 输入目的地，抽一张试试</p>
+  <!-- ======================================== -->
+  <!--  SCREEN 2: 工具页面                       -->
+  <!-- ======================================== -->
+  <div class="screen" id="screenTool">
+    <!-- Header with back button -->
+    <div class="tool-header">
+      <button class="btn-back" onclick="goBack()" title="返回选择模式">←</button>
+      <div class="tool-header-info">
+        <span class="mode-badge" id="toolBadge">🧒 小众亲子</span>
+        <h1 id="toolTitle">小众亲子</h1>
       </div>
-      <div class="card-face card-back" id="cardBack"></div>
     </div>
+
+    <!-- Shared: City List + Age/Days -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📍</span> 旅行城市</div>
+      <div class="city-list" id="cityList">
+        <div class="city-row">
+          <span class="city-num">1</span>
+          <input type="text" class="city-input" placeholder="比如：大同" value="">
+        </div>
+      </div>
+      <div class="route-preview" id="routePreview"></div>
+      <button class="btn-add-city" onclick="addCity()">+ 添加城市</button>
+
+      <div class="input-row">
+        <div class="input-field" id="ageField">
+          <label id="ageLabel">👶 孩子年龄</label>
+          <input type="text" id="ageInput" placeholder="比如：5岁" value="5岁">
+        </div>
+        <div class="input-field" style="flex:0.6;min-width:100px;" id="daysField">
+          <label>📅 旅行天数</label>
+          <input type="text" id="daysInput" placeholder="比如：5天" value="5天">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tool Tabs -->
+    <div class="tool-tabs" id="toolTabs">
+      <button class="tool-tab active" data-tool="generator">📝 提示词生成器</button>
+      <button class="tool-tab" data-tool="draw">🃏 体验抽卡机</button>
+    </div>
+
+    <!-- ============================================= -->
+    <!--  PANEL 1: 提示词生成器                          -->
+    <!-- ============================================= -->
+    <div class="panel active" id="panelGenerator">
+      <div class="card">
+        <div class="card-title"><span class="icon">✨</span> 操作</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generatePrompt()">✨ 生成提示词</button>
+          <button class="btn btn-outline" id="genCopyBtn" onclick="copyGenPrompt()" disabled>📋 复制</button>
+          <button class="btn btn-outline" onclick="openDoubao()">🚀 打开豆包</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📝</span> 生成的提示词</div>
+        <div class="empty-state" id="genEmpty">👆 填好城市，点「生成提示词」</div>
+        <div class="prompt-preview" id="genPreview"></div>
+      </div>
+
+      <div class="tips" id="genTips" style="display:none;">
+        <strong>💡 怎么用：</strong><br>
+        1. 点「复制」，提示词已在你剪贴板<br>
+        2. 点「打开豆包」→ 粘贴 → 运行<br>
+        3. 把生成的清单存到手机备忘录，出发前就有一个"随时抽卡"的库了<br>
+        <span style="color:#b8a088;" id="genTipExtra">输出的是体验候选池，不是行程表。到了当地根据孩子状态灵活挑。</span>
+      </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!--  PANEL 2: 体验抽卡机                            -->
+    <!-- ============================================= -->
+    <div class="panel" id="panelDraw">
+      <div class="card">
+        <div class="card-title"><span class="icon">🎯</span> 翻牌设置</div>
+        <div style="margin-bottom:4px;">
+          <label style="font-size:12px;font-weight:600;color:#999;display:block;margin-bottom:8px;">🎯 选择方向</label>
+          <div class="category-chips" id="chipContainer"></div>
+        </div>
+        <button class="btn-draw" id="drawBtn" onclick="drawCard()">✨ 翻一张</button>
+        <p style="font-size:12px;color:#c4bca8;margin-top:8px;text-align:center;">每张卡是一个定制提示词，复制后去豆包跑出完整体验</p>
+      </div>
+
+      <div class="card-stage">
+        <div class="flip-card" id="flipCard">
+          <div class="card-face card-front">
+            <div class="card-back-icon">🃏</div>
+            <p class="hint">👆 填好城市，翻一张试试</p>
+          </div>
+          <div class="card-face card-back" id="cardBack"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>兜兜探索 · 自用工具，不做商用</footer>
   </div>
 
-  <p class="footer">兜兜探索 · 一个INFP妈妈的带娃旅行系统</p>
 </div>
 
 <div class="toast" id="toast"></div>
 <div class="confetti-container" id="confetti"></div>
 
 <script>
-let currentCat = 'random';
-let isFlipped = false;
+// ===== State =====
+let currentMode = 'kid';
+let currentTool = 'generator';
+let drawCat = 'random';
+let drawFlipped = false;
 
-// Category chip toggle
-document.getElementById('chips').addEventListener('click', e => {
-  if (!e.target.classList.contains('chip')) return;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  e.target.classList.add('active');
-  currentCat = e.target.dataset.cat;
+// ===== Chip definitions =====
+const kidChips = [
+  { key: 'random', label: '🎲 随机抽' },
+  { key: 'make',   label: '🎨 动手做' },
+  { key: 'explore',label: '🔍 去发现' },
+  { key: 'tech',   label: '🤖 黑科技' },
+  { key: 'outdoor',label: '🌿 大自然' },
+];
+const hotspotChips = [
+  { key: 'random',   label: '🎲 随机抽' },
+  { key: 'landmark', label: '🏛️ 必打卡' },
+  { key: 'food',     label: '🍜 当地美食' },
+  { key: 'photo',    label: '📸 出片圣地' },
+  { key: 'citywalk', label: '🚶 城市漫步' },
+  { key: 'culture',  label: '🎭 在地文化' },
+];
+const kidCatNames = { make: '动手体验', explore: '探索发现', tech: '科技新奇', outdoor: '户外自然' };
+const kidCatBadges = { make: 'badge-make', explore: 'badge-explore', tech: 'badge-tech', outdoor: 'badge-outdoor' };
+const kidCatEmoji = { make: '🎨', explore: '🔍', tech: '🤖', outdoor: '🌿' };
+const hotspotCatNames = { landmark: '必打卡', food: '当地美食', photo: '出片圣地', citywalk: '城市漫步', culture: '在地文化' };
+const hotspotCatBadges = { landmark: 'badge-landmark', food: 'badge-food', photo: 'badge-photo', citywalk: 'badge-citywalk', culture: 'badge-culture' };
+const hotspotCatEmoji = { landmark: '🏛️', food: '🍜', photo: '📸', citywalk: '🚶', culture: '🎭' };
+
+// ===== Screen navigation =====
+function enterTool(mode) {
+  currentMode = mode;
+  const isKid = mode === 'kid';
+
+  // Update tool header
+  document.getElementById('toolBadge').textContent = isKid ? '🧒 小众亲子' : '🏛️ 经典热门';
+  document.getElementById('toolBadge').className = 'mode-badge ' + (isKid ? 'badge-kid' : 'badge-hotspot');
+  document.getElementById('toolTitle').textContent = isKid ? '小众亲子' : '经典热门';
+
+  // Update shared inputs
+  document.getElementById('ageLabel').textContent = isKid ? '👶 孩子年龄' : '👤 同行人员';
+  document.getElementById('ageInput').placeholder = isKid ? '比如：5岁' : '比如：2人、情侣、闺蜜';
+  document.getElementById('ageInput').value = isKid ? '5岁' : '';
+
+  // Update generator tip
+  document.getElementById('genTipExtra').textContent = isKid
+    ? '输出的是体验候选池，不是行程表。到了当地根据孩子状态灵活挑。'
+    : '输出的是可直接排行程的实用攻略，经典景点+本地隐藏全都有。';
+
+  // Reset tool state
+  currentTool = 'generator';
+  document.querySelectorAll('.tool-tab').forEach(t => t.classList.toggle('active', t.dataset.tool === 'generator'));
+  document.getElementById('panelGenerator').classList.add('active');
+  document.getElementById('panelDraw').classList.remove('active');
+  resetGenerator();
+  resetCard();
+
+  // Render chips
+  renderChips();
+  drawCat = 'random';
+
+  // Switch screen
+  document.getElementById('screenMode').classList.remove('active');
+  document.getElementById('screenTool').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goBack() {
+  document.getElementById('screenTool').classList.remove('active');
+  document.getElementById('screenMode').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetGenerator() {
+  document.getElementById('genPreview').classList.remove('visible');
+  document.getElementById('genPreview').textContent = '';
+  document.getElementById('genEmpty').classList.remove('hidden');
+  document.getElementById('genTips').style.display = 'none';
+  document.getElementById('genCopyBtn').disabled = true;
+}
+
+// ===== Tool Tab Switching =====
+document.getElementById('toolTabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('tool-tab')) return;
+  const tool = e.target.dataset.tool;
+  if (tool === currentTool) return;
+  currentTool = tool;
+  document.querySelectorAll('.tool-tab').forEach(t => t.classList.toggle('active', t.dataset.tool === tool));
+  document.getElementById('panelGenerator').classList.toggle('active', tool === 'generator');
+  document.getElementById('panelDraw').classList.toggle('active', tool === 'draw');
 });
 
-// Shuffle deck animation
+// ===== City management =====
+function getCities() {
+  const inputs = document.querySelectorAll('#cityList .city-input');
+  return Array.from(inputs).map(el => el.value.trim()).filter(Boolean);
+}
+
+function formatCities(cities) {
+  if (cities.length === 0) return '';
+  if (cities.length === 1) return cities[0];
+  return cities.join(' → ');
+}
+
+function formatCitiesMultiline(cities) {
+  if (cities.length === 0) return '';
+  if (cities.length === 1) return cities[0];
+  return cities.map((c, i) => `第${i+1}站：${c}`).join('\n');
+}
+
+function updateRoutePreview() {
+  const cities = getCities();
+  const preview = document.getElementById('routePreview');
+  if (cities.length > 1) {
+    preview.innerHTML = '🗺️ <span>' + formatCities(cities) + '</span>';
+  } else {
+    preview.innerHTML = '';
+  }
+}
+
+function addCity(initialValue) {
+  const list = document.getElementById('cityList');
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'city-row';
+  row.innerHTML = `
+    <span class="city-num">${idx}</span>
+    <input type="text" class="city-input" placeholder="比如：${idx === 1 ? '大同' : idx === 2 ? '忻州' : '太原'}" value="${initialValue || ''}">
+    <button class="btn-remove-city" onclick="removeCity(this)" title="移除">×</button>
+  `;
+  list.appendChild(row);
+  updateCityNumbers();
+  updateRoutePreview();
+
+  const newInput = row.querySelector('.city-input');
+  newInput.addEventListener('input', updateRoutePreview);
+  newInput.addEventListener('blur', updateRoutePreview);
+  if (!initialValue) newInput.focus();
+}
+
+function removeCity(btn) {
+  const list = document.getElementById('cityList');
+  if (list.children.length <= 1) {
+    list.querySelector('.city-input').value = '';
+    updateRoutePreview();
+    return;
+  }
+  btn.parentElement.remove();
+  updateCityNumbers();
+  updateRoutePreview();
+}
+
+function updateCityNumbers() {
+  const rows = document.querySelectorAll('#cityList .city-row');
+  rows.forEach((row, i) => {
+    row.querySelector('.city-num').textContent = i + 1;
+  });
+}
+
+// ===== Prompt Templates =====
+const KID_PROMPT_SINGLE = `你是一个带娃旅行体验策划师。请根据以下信息，为带{age}孩子出行的家长推荐小众、可上手的新奇体验。
+
+## 目的地
+{destination}
+
+## 核心原则
+
+1. **不要网红景点**。排除所有热门打卡地、排队景点、拍照出片地。
+2. **孩子能上手**。首选可以摸、做、参与、操作的体验——手工、食物制作、动物互动、科技互动、户外探索。
+3. **大人也觉得有意思**。不是纯儿童游乐场，是有文化/手艺/技术含量的体验。
+4. **实操信息完整**。每个推荐必须包含具体地点、大概耗时、是否需预约、参考价格。
+
+## 输出格式
+
+按四个分类输出，每个分类 3-4 个体验，总共 10-15 个：
+
+### 🎨 体验类（动手/参与）
+| 体验 | 地点 | 耗时 | 预约 | ¥ | 为什么适合孩子 |
+|------|------|------|-----|-----|----------------|
+| ... | ... | ... | ... | ... | ... |
+
+### 🔍 探索类（观察/发现）
+同上
+
+### 🤖 科技/新奇类
+同上
+
+### 🌿 户外/自然类
+同上
+
+## 特别提示
+最后附一段：哪些需要提前预约、哪些看天气、哪些对{age}孩子可能偏难。
+
+记住：目标是帮家长建一个"到了当地可以随时抽卡"的体验库，不是排行程表。`;
+
+const KID_PROMPT_MULTI = `你是一个带娃旅行体验策划师。家长计划带{age}孩子走一条多城市路线，请为每个城市分别推荐亲子体验。
+
+## 旅行路线
+{cities}
+
+总行程约{days}天。
+
+## 核心原则
+
+1. **不要网红景点**。排除所有热门打卡地、排队景点、拍照出片地。
+2. **孩子能上手**。首选可以摸、做、参与、操作的体验——手工、食物制作、动物互动、科技互动、户外探索。
+3. **大人也觉得有意思**。不是纯儿童游乐场，是有文化/手艺/技术含量的体验。
+4. **实操信息完整**。每个推荐必须包含具体地点、大概耗时、是否需预约、参考价格。
+5. **合理分配天数**。根据每个城市的特点，建议合理的停留天数和节奏。
+
+## 输出格式
+
+按城市分段，每个城市输出该城市的推荐体验（按四个分类，每类 2-3 个）：
+
+### 🏙️ 第1站：{city1}
+（建议停留 X 天）
+
+#### 🎨 体验类
+| 体验 | 地点 | 耗时 | 预约 | ¥ | 为什么适合孩子 |
+|------|------|------|-----|-----|----------------|
+
+#### 🔍 探索类
+...
+
+#### 🤖 科技/新奇类
+...
+
+#### 🌿 户外/自然类
+...
+
+（后续城市同上格式）
+
+## 路线建议
+最后附一段：城市间的交通建议、哪些体验需要提前预约、哪些看天气、整体节奏是否合理。
+
+记住：目标是帮家长建一个"到了当地可以随时抽卡"的体验库，不是排行程表。`;
+
+const HOTSPOT_PROMPT_SINGLE = `你是一个资深旅行规划师。请根据以下信息，为去{destination}旅行的游客做一份全面的目的地攻略。
+
+## 目的地
+{destination}
+
+## 核心原则
+
+1. **经典+小众兼顾**。既要覆盖必去的经典景点，也要挖掘一些本地人才知道的隐藏好地方。
+2. **信息实用**。每个推荐标注具体地点、开放时间、门票价格、建议游玩时长、交通方式。
+3. **美食不踩雷**。推荐真正好吃的本地特色，不限于网红店，标注人均消费。
+4. **行程可落地**。给出的信息要能直接用来排行程，不是泛泛的介绍。
+
+## 输出格式
+
+按五个分类输出，总共 12-18 个推荐：
+
+### 🏛️ 必去景点（5-6个）
+| 景点 | 地址 | 门票 | 游玩时长 | 交通 | 看点/贴士 |
+|------|------|------|----------|------|-----------|
+| ... | ... | ... | ... | ... | ... |
+
+### 🍜 美食推荐（4-5个）
+| 店名/美食 | 位置 | 人均 | 推荐菜 | 备注 |
+|-----------|------|------|--------|------|
+| ... | ... | ... | ... | ... |
+
+### 📸 出片/特色体验（2-3个）
+| 体验 | 地点 | 最佳时间 | 贴士 |
+|------|------|----------|------|
+| ... | ... | ... | ... |
+
+### 🚶 推荐路线（1-2条）
+一日游 / 两日游路线建议，标注大概节奏。
+
+### ⚠️ 实用贴士
+- 交通建议（怎么去最方便）
+- 住宿区域推荐
+- 最佳旅行季节
+- 避坑提醒
+
+记住：输出的是可以直接用来排行程的实用攻略，每个推荐都要有可操作的信息。`;
+
+const HOTSPOT_PROMPT_MULTI = `你是一个资深旅行规划师。请在以下多城市旅行路线中，为每个城市分别做一份实用攻略。
+
+## 旅行路线
+{cities}
+
+总行程约{days}天。
+
+## 核心原则
+
+1. **经典+小众兼顾**。每个城市既要覆盖必去的经典景点，也要挖掘本地人才知道的隐藏好地方。
+2. **信息实用**。每个推荐标注具体地点、开放时间、门票价格、建议游玩时长、交通方式。
+3. **美食不踩雷**。推荐真正好吃的本地特色，不限于网红店，标注人均消费。
+4. **行程可落地**。给出的信息要能直接用来排行程，不是泛泛的介绍。
+5. **合理分配天数**。根据每个城市的分量和距离，建议合理的停留天数和城际交通方式。
+
+## 输出格式
+
+按城市分段，每个城市输出：
+
+### 🏙️ 第1站：{city1}
+（建议停留 X 天）
+
+#### 🏛️ 必去景点（3-4个）
+| 景点 | 地址 | 门票 | 游玩时长 | 交通 | 看点/贴士 |
+|------|------|------|----------|------|-----------|
+
+#### 🍜 美食推荐（2-3个）
+| 店名/美食 | 位置 | 人均 | 推荐菜 | 备注 |
+|-----------|------|------|--------|------|
+
+#### 📸 特色体验（1-2个）
+| 体验 | 地点 | 最佳时间 | 贴士 |
+|------|------|----------|------|
+
+（后续城市同上格式）
+
+## 整体路线建议
+- 城际交通建议（怎么串联最合理）
+- 住宿区域推荐（每个城市）
+- 整体节奏评估
+- 避坑提醒
+
+记住：输出的是可以直接用来排行程的实用攻略，每个推荐都要有可操作的信息。`;
+
+const KID_DRAW_PROMPTS = {
+  make: `在{destination}，有哪些适合{age}孩子动手做的体验？可以是手工、食物制作、传统手艺、搭建类。要求：孩子能全程参与、不是纯观看。请给出3-4个具体推荐，标注地点、耗时、是否需预约、参考价格。`,
+  explore: `在{destination}，有哪些适合{age}孩子的探索发现类体验？可以是博物馆里能互动的展区、老城区的隐藏角落、菜市场或传统集市、有趣的建筑或街区。要求：孩子能观察、提问、发现。请给出3-4个具体推荐。`,
+  tech: `在{destination}，有哪些适合{age}孩子的科技或新奇体验？比如无人驾驶、VR/AR、机器人互动、新奇交通方式、科技馆的互动装置。要求：大人也会觉得新鲜。请给出3-4个具体推荐。`,
+  outdoor: `在{destination}，有哪些适合{age}孩子的户外自然体验？不是普通公园，是有特色的——划船、骑马、采茶、挖笋、溯溪、赶海、夜观昆虫等。要求：安全、亲子友好。请给出3-4个具体推荐。`,
+};
+const HOTSPOT_DRAW_PROMPTS = {
+  landmark: `在{destination}，有哪些必去的经典景点和地标？请推荐4-5个最值得去的，标注每个景点的地址、门票、建议游玩时长、最佳游览时间段、以及一个实用贴士。要求：既有大众经典，也有一两个游客少的好地方。`,
+  food: `在{destination}，有什么一定要吃的美食？请推荐4-5个本地特色美食或餐厅，可以包括老字号、街头小吃、本地人常去的店。标注店名/美食名称、大概位置、人均消费、必点菜。要求：不要只推网红店，好吃的苍蝇馆子也放进来。`,
+  photo: `在{destination}，有哪些拍照出片的好地方？请推荐3-4个适合拍照的地点，可以是建筑、街景、自然景观、特色空间。标注最佳拍摄时间段、具体机位建议。要求：不要全是千篇一律的打卡点，找有独特性的。`,
+  citywalk: `在{destination}，推荐一条适合城市漫步的路线，串联有趣的街区、老建筑、小店、咖啡馆或市集。要求：路线有故事感不是纯走路，标注大概步行时长和沿途亮点。请给出1-2条路线，每条3-4个停靠点。`,
+  culture: `在{destination}，有哪些能感受本地文化的体验？可以是博物馆、传统表演、手工艺体验、本地节日、特色市集、老茶馆等。请推荐3-4个，标注地点、开放时间/场次、是否需要预约。要求：不是走马观花，是能沉浸感受的。`,
+};
+
+// ===== Chips =====
+function renderChips() {
+  const chips = currentMode === 'kid' ? kidChips : hotspotChips;
+  document.getElementById('chipContainer').innerHTML = chips.map((c, i) =>
+    `<span class="chip ${i === 0 ? 'active' : ''}" data-cat="${c.key}">${c.label}</span>`
+  ).join('');
+}
+document.getElementById('chipContainer').addEventListener('click', e => {
+  if (!e.target.classList.contains('chip')) return;
+  document.querySelectorAll('#chipContainer .chip').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  drawCat = e.target.dataset.cat;
+});
+
+// ===== Prompt Generator =====
+function generatePrompt() {
+  const cities = getCities();
+  if (cities.length === 0) { showToast('请至少输入一个城市'); return; }
+
+  const isKid = currentMode === 'kid';
+  const age = document.getElementById('ageInput').value.trim() || (isKid ? '5岁' : '');
+  const days = document.getElementById('daysInput').value.trim() || '';
+
+  let template;
+  if (cities.length === 1) {
+    template = isKid ? KID_PROMPT_SINGLE : HOTSPOT_PROMPT_SINGLE;
+  } else {
+    template = isKid ? KID_PROMPT_MULTI : HOTSPOT_PROMPT_MULTI;
+  }
+
+  let prompt = template
+    .replace(/\{destination\}/g, cities[0])
+    .replace(/\{cities\}/g, formatCitiesMultiline(cities))
+    .replace(/\{city1\}/g, cities[0])
+    .replace(/\{age\}/g, age)
+    .replace(/\{days\}/g, days || (cities.length * 2 + '天'));
+
+  const preview = document.getElementById('genPreview');
+  preview.textContent = prompt;
+  preview.classList.add('visible');
+  document.getElementById('genEmpty').classList.add('hidden');
+  document.getElementById('genTips').style.display = 'block';
+  document.getElementById('genCopyBtn').disabled = false;
+  preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function copyGenPrompt() {
+  const text = document.getElementById('genPreview').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制，去豆包粘贴吧')).catch(() => showToast('复制失败，请手动选中复制'));
+}
+
+// ===== Card Draw Machine =====
 function shuffleDeck() {
-  const card = document.getElementById('card');
+  const card = document.getElementById('flipCard');
   card.style.transition = 'transform 0.15s ease';
   let shakes = 0;
   const doShake = () => {
     if (shakes >= 6) {
-      card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      card.style.transform = drawFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       card.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
       return;
     }
     const deg = shakes % 2 === 0 ? 4 : -4;
-    card.style.transform = (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)') + ` rotate(${deg}deg)`;
+    card.style.transform = (drawFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)') + ` rotate(${deg}deg)`;
     shakes++;
     setTimeout(doShake, 80);
   };
@@ -384,88 +734,94 @@ function shuffleDeck() {
 }
 
 function drawCard() {
-  const dest = document.getElementById('dest').value.trim() || '这个地方';
-  const age = document.getElementById('age').value.trim() || '5岁';
+  const cities = getCities();
+  if (cities.length === 0) { showToast('请至少输入一个城市'); return; }
 
-  const catNames = { make: '动手体验', explore: '探索发现', tech: '科技新奇', outdoor: '户外自然' };
-  const catBadges = { make: 'badge-make', explore: 'badge-explore', tech: 'badge-tech', outdoor: 'badge-outdoor' };
-  const catEmoji = { make: '🎨', explore: '🔍', tech: '🤖', outdoor: '🌿' };
+  const isKid = currentMode === 'kid';
+  const age = document.getElementById('ageInput').value.trim() || (isKid ? '5岁' : '');
+  const days = document.getElementById('daysInput').value.trim() || '';
+  const destLabel = formatCities(cities);
 
-  // Pick category
+  const catNames = isKid ? kidCatNames : hotspotCatNames;
+  const catBadges = isKid ? kidCatBadges : hotspotCatBadges;
+  const catEmoji = isKid ? kidCatEmoji : hotspotCatEmoji;
+  const prompts = isKid ? KID_DRAW_PROMPTS : HOTSPOT_DRAW_PROMPTS;
+  const catKeys = isKid ? ['make','explore','tech','outdoor'] : ['landmark','food','photo','citywalk','culture'];
+
   let cat;
-  if (currentCat === 'random') {
-    const cats = ['make','explore','tech','outdoor'];
-    cat = cats[Math.floor(Math.random() * cats.length)];
+  if (drawCat === 'random') {
+    cat = catKeys[Math.floor(Math.random() * catKeys.length)];
   } else {
-    cat = currentCat;
+    cat = drawCat;
   }
 
-  // Build specific prompt
-  const prompts = {
-    make: `在${dest}，有哪些适合${age}孩子动手做的体验？可以是手工、食物制作、传统手艺、搭建类。要求：孩子能全程参与、不是纯观看。请给出3-4个具体推荐，标注地点、耗时、是否需预约、参考价格。`,
-    explore: `在${dest}，有哪些适合${age}孩子的探索发现类体验？可以是博物馆里能互动的展区、老城区的隐藏角落、菜市场或传统集市、有趣的建筑或街区。要求：孩子能观察、提问、发现。请给出3-4个具体推荐。`,
-    tech: `在${dest}，有哪些适合${age}孩子的科技或新奇体验？比如无人驾驶、VR/AR、机器人互动、新奇交通方式、科技馆的互动装置。要求：大人也会觉得新鲜。请给出3-4个具体推荐。`,
-    outdoor: `在${dest}，有哪些适合${age}孩子的户外自然体验？不是普通公园，是有特色的——划船、骑马、采茶、挖笋、溯溪、赶海、夜观昆虫等。要求：安全、亲子友好。请给出3-4个具体推荐。`
-  };
+  let locationStr;
+  if (cities.length === 1) {
+    locationStr = cities[0];
+  } else {
+    locationStr = cities.join('、') + '这条线路';
+  }
 
-  const prompt = prompts[cat];
+  let prompt = prompts[cat]
+    .replace(/\{destination\}/g, locationStr)
+    .replace(/\{age\}/g, age)
+    .replace(/\{days\}/g, days);
 
-  // Build card back
-  const back = document.getElementById('cardBack');
-  back.innerHTML = `
+  if (cities.length > 1) {
+    prompt += `\n\n请按城市分段推荐，覆盖：${cities.join('、')}。`;
+  }
+
+  const subLabel = cities.length > 1
+    ? cities.length + '城 · ' + (isKid ? '适合 ' + age + ' 孩子' : (days || '多日') + '行程')
+    : (isKid ? '适合 ' + age + ' 孩子' : (days || ''));
+
+  const backHTML = `
     <span class="card-badge ${catBadges[cat]}">${catEmoji[cat]} ${catNames[cat]}</span>
-    <h2>${dest} · ${catNames[cat]}</h2>
-    <p class="card-location">适合 ${age} 孩子 · 定制提示词</p>
+    <h2>${destLabel} · ${catNames[cat]}</h2>
+    <p class="card-location">${subLabel} · 定制提示词</p>
     <div class="card-prompt">${prompt}</div>
     <div class="card-actions">
       <button class="btn-copy" onclick="event.stopPropagation(); copyCardPrompt()">📋 复制</button>
       <button class="btn-goto" onclick="event.stopPropagation(); openDoubao()">🚀 豆包</button>
-      <button class="btn-redraw" onclick="event.stopPropagation(); drawCard()">🔄 再抽一张</button>
+      <button class="btn-redraw" onclick="event.stopPropagation(); drawCard()">🔄 再翻一张</button>
     </div>
   `;
 
-  // Flip
-  if (!isFlipped) {
-    // First draw: flip with shuffle effect
+  const back = document.getElementById('cardBack');
+  const card = document.getElementById('flipCard');
+
+  if (!drawFlipped) {
+    back.innerHTML = backHTML;
     shuffleDeck();
-    setTimeout(() => {
-      document.getElementById('card').classList.add('flipped');
-      isFlipped = true;
-      spawnConfetti();
-    }, 400);
+    setTimeout(() => { card.classList.add('flipped'); drawFlipped = true; spawnConfetti(); }, 400);
   } else {
-    // Redraw: flip down, update, flip up
-    const card = document.getElementById('card');
     card.classList.remove('flipped');
-    isFlipped = false;
+    drawFlipped = false;
     shuffleDeck();
     setTimeout(() => {
-      card.style.transform = '';  // clear inline so class takes over
-      back.innerHTML = `
-        <span class="card-badge ${catBadges[cat]}">${catEmoji[cat]} ${catNames[cat]}</span>
-        <h2>${dest} · ${catNames[cat]}</h2>
-        <p class="card-location">适合 ${age} 孩子 · 定制提示词</p>
-        <div class="card-prompt">${prompt}</div>
-        <div class="card-actions">
-          <button class="btn-copy" onclick="event.stopPropagation(); copyCardPrompt()">📋 复制</button>
-          <button class="btn-goto" onclick="event.stopPropagation(); openDoubao()">🚀 豆包</button>
-          <button class="btn-redraw" onclick="event.stopPropagation(); drawCard()">🔄 再抽一张</button>
-        </div>
-      `;
+      card.style.transform = '';
+      back.innerHTML = backHTML;
       card.classList.add('flipped');
-      isFlipped = true;
+      drawFlipped = true;
       spawnConfetti();
     }, 550);
   }
 }
 
-function copyCardPrompt() {
-  const text = document.querySelector('.card-prompt').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('✅ 已复制！去 豆包 粘贴吧');
-  });
+function resetCard() {
+  const card = document.getElementById('flipCard');
+  card.classList.remove('flipped');
+  card.style.transform = '';
+  drawFlipped = false;
+  document.getElementById('cardBack').innerHTML = '';
 }
 
+function copyCardPrompt() {
+  const text = document.querySelector('.card-prompt').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制！去豆包粘贴吧'));
+}
+
+// ===== Shared =====
 function openDoubao() {
   window.open('https://www.doubao.com/chat/', '_blank');
 }
@@ -494,6 +850,13 @@ function showToast(msg) {
   clearTimeout(t._t);
   t._t = setTimeout(() => t.classList.remove('show'), 2000);
 }
+
+// ===== Init =====
+document.querySelectorAll('#cityList .city-input').forEach(input => {
+  input.addEventListener('input', updateRoutePreview);
+  input.addEventListener('blur', updateRoutePreview);
+});
+renderChips();
 </script>
 
 </body>
